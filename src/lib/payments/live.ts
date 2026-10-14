@@ -180,9 +180,13 @@ export const liveProvider: PaymentsProvider = {
   mode: "live",
 
   async getRates() {
-    const d = await qadi<{ base: string; rates: Record<string, string | number> }>("GET", "/v1/fiat-orders/fx-rates");
-    const KES = Number(d?.rates?.KES);
-    const NGN = Number(d?.rates?.NGN);
+    const d = await qadi<{ base: string; rates: Record<string, { rate: string } | string | number> }>(
+      "GET",
+      "/v1/fiat-orders/fx-rates",
+    );
+    const rate = (v: { rate: string } | string | number | undefined) => Number(typeof v === "object" ? v.rate : v);
+    const KES = rate(d?.rates?.KES);
+    const NGN = rate(d?.rates?.NGN);
     if (!KES || !NGN) throw new ProviderError("Qadi FX rates are missing KES or NGN.");
     return { KES, NGN, updatedAt: new Date().toISOString() };
   },
