@@ -42,6 +42,8 @@ Create an OAuth client in Google Cloud Console, add `{BETTER_AUTH_URL}/api/auth/
 | Buy crypto | `POST /v1/fiat-orders/onramp/quote` (amount in fiat, external destination) → `POST /v1/fiat-orders/onramp/execute` |
 | Final states | `fiat_order.fulfilled / failed / refunded / expired` webhooks; the order page also polls `GET /v1/fiat-orders/{id}` while it's open |
 
+Missed deposit webhooks are caught by a poll: every 5 minutes the app calls `GET /v1/deposits` for the last 48 hours and applies any it hasn't seen (`src/instrumentation.ts` → `/api/cron/deposits`).
+
 Webhooks are verified with HMAC-SHA256 over `{timestamp}.{body}` (`X-Qadi-Signature`, `X-Qadi-Timestamp`) and rejected if older than five minutes. Events are de-duplicated by deposit/order id, since Qadi doesn't guarantee order or single delivery.
 
 Notes:

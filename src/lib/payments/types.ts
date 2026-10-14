@@ -100,6 +100,8 @@ export interface PaymentsProvider {
   createBeneficiary(input: BeneficiaryInput): Promise<{ ref: string }>;
   removeBeneficiary(ref: string): Promise<void>;
   createDepositAddress(input: { label: string }): Promise<{ ref: string; address: string }>;
+  /** Deposits that cleared screening since `since`; backs up the deposit.received webhook. */
+  listRecentDeposits(since: Date): Promise<ProviderEvent[]>;
   archiveDepositAddress(ref: string): Promise<void>;
   offrampDeposit(input: OfframpInput): Promise<OfframpStarted>;
   createOnramp(input: OnrampInput): Promise<OnrampOrder>;

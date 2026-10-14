@@ -73,6 +73,23 @@ function customFee(currency: Currency) {
 
 const num = (v: unknown) => (v === null || v === undefined || v === "" ? undefined : Number(v));
 
+/** Same event id for webhook and polled deposits, so each is applied once. */
+function depositEvent(p: Record<string, unknown>, occurredAt: string): ProviderEvent | null {
+  const token = String(p.token ?? "").toUpperCase();
+  if (!(TOKENS as readonly string[]).includes(token) || !p.id || !p.toAddress) return null;
+  return {
+    id: `deposit:${p.id}`,
+    type: "deposit.received",
+    occurredAt,
+    depositRef: String(p.id),
+    address: String(p.toAddress),
+    chain: String(p.chain ?? ""),
+    token: token as Token,
+    cryptoAmount: Number(p.amount),
+    txHash: p.txHash ? String(p.txHash) : undefined,
+  };
+}
+
 type OfframpQuote = {
   quoteId: string;
   cryptoAmount: string;
@@ -216,6 +233,24 @@ export const liveProvider: PaymentsProvider = {
     return { ref: d.id, address };
   },
 
+  async listRecentDeposits(since) {
+    const events: ProviderEvent[] = [];
+    for (let page = 1; page <= 20; page++) {
+      const res = await qadi<{ data: Record<string, unknown>[]; meta: { totalPages: number } }>("GET", "/v1/deposits", undefined, {
+        status: "received",
+        from: since.toISOString(),
+        page: String(page),
+        limit: "100",
+      });
+      for (const d of res?.data ?? []) {
+        const event = depositEvent(d, String(d.createdAt ?? new Date().toISOString()));
+        if (event) events.push(event);
+      }
+      if (page >= (res?.meta?.totalPages ?? 0)) break;
+    }
+    return events;
+  },
+
   async archiveDepositAddress(ref) {
     await qadi("PATCH", `/v1/wallets/${encodeURIComponent(ref)}`, { archived: true });
   },
@@ -322,21 +357,8 @@ export const liveProvider: PaymentsProvider = {
     const occurredAt = new Date().toISOString();
 
     if (type === "deposit.received") {
-      const token = String(p.token ?? "").toUpperCase();
-      if (!(TOKENS as readonly string[]).includes(token) || !p.id || !p.toAddress) return [];
-      return [
-        {
-          id: `deposit:${p.id}`,
-          type: "deposit.received",
-          occurredAt,
-          depositRef: String(p.id),
-          address: String(p.toAddress),
-          chain: String(p.chain ?? ""),
-          token: token as Token,
-          cryptoAmount: Number(p.amount),
-          txHash: p.txHash ? String(p.txHash) : undefined,
-        },
-      ];
+      const event = depositEvent(p, occurredAt);
+      return event ? [event] : [];
     }
 
     const final: Record<string, TxStatus> = {

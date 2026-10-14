@@ -109,6 +109,10 @@ export const mockProvider = {
     };
   },
 
+  async listRecentDeposits() {
+    return [];
+  },
+
   async getOrder() {
     return null;
   },
