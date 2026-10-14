@@ -72,7 +72,6 @@ function customFee(currency: Currency) {
 }
 
 const num = (v: unknown) => (v === null || v === undefined || v === "" ? undefined : Number(v));
-const walletChain = (n: Network) => (n === "solana" ? "solana" : "evm");
 
 type OfframpQuote = {
   quoteId: string;
@@ -207,7 +206,7 @@ export const liveProvider: PaymentsProvider = {
   },
 
   async createDepositAddress({ label, network }) {
-    const chain = walletChain(network);
+    const chain = "evm";
     const d = await qadi<{ id: string; addresses: { chain: string; address: string }[] }>("POST", "/v1/wallets", {
       label,
       chains: [chain],

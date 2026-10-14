@@ -2,7 +2,7 @@
 
 Stablecoin on/off-ramp for Kenya and Nigeria, built on [Qadi](https://docs.qadi.io).
 
-- **Cash out (automatic):** create a wallet on Solana, Base or BNB Smart Chain, link it to an M-Pesa number or bank account, and any USDC/USDT sent to it is converted to KES or NGN and paid out.
+- **Cash out (automatic):** create a wallet on Base or BNB Smart Chain, link it to an M-Pesa number or bank account, and any USDC/USDT sent to it is converted to KES or NGN and paid out.
 - **Buy crypto (manual):** pay KES with an M-Pesa prompt or NGN by bank transfer, receive USDC/USDT at any address.
 - **Verification:** accounts can move up to `KYB_THRESHOLD_USD` (default $5,000) before business verification. KYB itself isn't integrated yet; requests are recorded and approved by hand.
 
@@ -28,7 +28,7 @@ Create an OAuth client in Google Cloud Console, add `{BETTER_AUTH_URL}/api/auth/
 
 1. Create a Qadi business account, turn on 2FA, and generate an API key (`sk_test_…` first). Set `QADI_API_KEY` and `PAYMENTS_MODE=live`.
 2. In the Qadi dashboard, set the webhook URL to `https://kidogopay.xyz/api/webhooks/qadi` and copy the signing secret into `QADI_WEBHOOK_SECRET`.
-3. **Fund your treasury wallet** if you sell crypto on the M-Pesa corridor (`ke-mpesa-rail-02`): Qadi pays onramps out of it unless Qadi provides liquidity for your account. Get the addresses from `GET /v1/fiat-orders/settings/treasury-wallet` (BSC/Base and Solana).
+3. **Fund your treasury wallet** if you sell crypto on the M-Pesa corridor (`ke-mpesa-rail-02`): Qadi pays onramps out of it unless Qadi provides liquidity for your account. Get the addresses from `GET /v1/fiat-orders/settings/treasury-wallet` (BSC/Base).
 4. Check corridors with `GET /v1/fiat-orders/settings/corridors`. Qadi lists KES via M-Pesa as a direct rail; NGN goes through its standard processing, so confirm NGN payouts and onramps with Qadi before launch.
 5. Optional fee: set `KIDOGO_FEE_PERCENT` and register a fee recipient for each chain with `PUT /v1/custom-fee-recipients/{chain}`. Qadi supports custom fees on the rail-02 corridors, so the app only adds it to KES orders.
 
@@ -37,7 +37,7 @@ Create an OAuth client in Google Cloud Console, add `{BETTER_AUTH_URL}/api/auth/
 | Step | Qadi call |
 | --- | --- |
 | Payout account added | `POST /v1/bank-accounts` (M-Pesa numbers are bank accounts with the M-Pesa institution code) |
-| Wallet created | `POST /v1/wallets` with `chains: ["evm"]` or `["solana"]`, one Qadi wallet per KidogoPay wallet |
+| Wallet created | `POST /v1/wallets` with `chains: ["evm"]`, one Qadi wallet per KidogoPay wallet |
 | Deposit lands | `deposit.received` webhook → `POST /v1/fiat-orders/offramp/quote` (source = that wallet, destination = linked bank account) → `POST /v1/fiat-orders/offramp/execute` |
 | Buy crypto | `POST /v1/fiat-orders/onramp/quote` (amount in fiat, external destination) → `POST /v1/fiat-orders/onramp/execute` |
 | Final states | `fiat_order.fulfilled / failed / refunded / expired` webhooks; the order page also polls `GET /v1/fiat-orders/{id}` while it's open |

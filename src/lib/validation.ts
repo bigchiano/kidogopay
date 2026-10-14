@@ -1,7 +1,6 @@
 import { keccak_256 } from "@noble/hashes/sha3.js";
 import { bytesToHex, utf8ToBytes } from "@noble/hashes/utils.js";
-import { base58 } from "@scure/base";
-import { NETWORK_INFO, type Network } from "./constants";
+import type { Network } from "./constants";
 
 /** EIP-55: mixed-case addresses carry a checksum that catches typos. */
 function hasValidEvmChecksum(address: string) {
@@ -41,26 +40,10 @@ export function evmAddressError(address: string): string | null {
   return null;
 }
 
-export function solanaAddressError(address: string): string | null {
-  if (!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address)) {
-    return "Enter a Solana address (32–44 letters and numbers).";
-  }
-  try {
-    if (base58.decode(address).length !== 32) {
-      return "This isn't a valid Solana address. Copy it again from your wallet.";
-    }
-  } catch {
-    return "This isn't a valid Solana address. Copy it again from your wallet.";
-  }
-  return null;
-}
-
-export function addressError(network: Network, address: string): string | null {
+export function addressError(_network: Network, address: string): string | null {
   const trimmed = address.trim();
   if (!trimmed) return "Enter the wallet address that should receive the crypto.";
-  return NETWORK_INFO[network].addressKind === "evm"
-    ? evmAddressError(trimmed)
-    : solanaAddressError(trimmed);
+  return evmAddressError(trimmed);
 }
 
 /**

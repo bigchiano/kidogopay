@@ -1,5 +1,4 @@
 import { randomBytes } from "node:crypto";
-import { base58 } from "@scure/base";
 import { floorTo } from "@/lib/format";
 import { toChecksumAddress } from "@/lib/validation";
 import type { Currency, Network, Token } from "@/lib/constants";
@@ -42,14 +41,12 @@ function slug(s: string) {
 const ref = (prefix: string) => `${prefix}_${randomBytes(8).toString("hex")}`;
 const now = () => new Date().toISOString();
 
-function fakeAddress(network: Network) {
-  return network === "solana"
-    ? base58.encode(randomBytes(32))
-    : toChecksumAddress(`0x${randomBytes(20).toString("hex")}`);
+function fakeAddress() {
+  return toChecksumAddress(`0x${randomBytes(20).toString("hex")}`);
 }
 
-function fakeTxHash(network: Network) {
-  return network === "solana" ? base58.encode(randomBytes(64)) : `0x${randomBytes(32).toString("hex")}`;
+function fakeTxHash() {
+  return `0x${randomBytes(32).toString("hex")}`;
 }
 
 export const mockProvider = {
@@ -70,7 +67,7 @@ export const mockProvider = {
   async removeBeneficiary() {},
 
   async createDepositAddress(input: { network: Network }) {
-    return { ref: ref("mock_wal"), address: fakeAddress(input.network) };
+    return { ref: ref("mock_wal"), address: fakeAddress() };
   },
 
   async archiveDepositAddress() {},
@@ -140,7 +137,7 @@ export const mockProvider = {
       chain: input.network,
       token: input.token,
       cryptoAmount: input.amount,
-      txHash: fakeTxHash(input.network),
+      txHash: fakeTxHash(),
     };
   },
 

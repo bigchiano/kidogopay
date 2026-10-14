@@ -124,7 +124,7 @@ export async function simulateOnrampPayment(id: string): Promise<ActionResult> {
     mockProvider.orderEvent(tx.orderRef, {
       status: "completed",
       cryptoAmount: Number(tx.cryptoAmount),
-      txHash: mockProvider.fakeTxHash(tx.network),
+      txHash: mockProvider.fakeTxHash(),
     }),
   ]);
   revalidatePath("/dashboard", "layout");

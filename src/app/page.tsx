@@ -12,7 +12,7 @@ const STEPS = [
   },
   {
     title: "Create a wallet",
-    body: "Pick Solana, Base or BNB Smart Chain. You get an address linked to that payout account.",
+    body: "Pick Base or BNB Smart Chain. You get an address linked to that payout account.",
   },
   {
     title: "Send USDC or USDT",
@@ -21,7 +21,7 @@ const STEPS = [
 ];
 
 const SUPPORTED: [string, string][] = [
-  ["Networks", "Solana, Base and BNB Smart Chain"],
+  ["Networks", "Base and BNB Smart Chain"],
   ["Coins", "USDC and USDT"],
   ["Payouts in Kenya", "M-Pesa and Kenyan bank accounts, in KES"],
   ["Payouts in Nigeria", "Nigerian bank accounts, in NGN"],

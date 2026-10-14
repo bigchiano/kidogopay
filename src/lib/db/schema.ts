@@ -87,7 +87,7 @@ export const verification = pgTable(
 /* ───────────────────────────── KidogoPay ───────────────────────────── */
 
 export const currencyEnum = pgEnum("currency", ["KES", "NGN"]);
-export const networkEnum = pgEnum("network", ["solana", "base", "bsc"]);
+export const networkEnum = pgEnum("network", ["base", "bsc"]);
 export const tokenEnum = pgEnum("token", ["USDC", "USDT"]);
 export const payoutMethodEnum = pgEnum("payout_method", ["bank", "mobile_money"]);
 export const walletStatusEnum = pgEnum("wallet_status", ["active", "paused"]);
