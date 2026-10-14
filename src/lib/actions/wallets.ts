@@ -5,7 +5,7 @@ import { and, eq, isNull } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { payoutAccount, transaction, wallet } from "@/lib/db/schema";
-import { MAX_USD, NETWORKS, NETWORK_INFO, TOKENS } from "@/lib/constants";
+import { MAX_USD, NETWORKS, TOKENS, networkNames } from "@/lib/constants";
 import { requireUser } from "@/lib/session";
 import { limitError } from "@/lib/limits";
 import { mockProvider, payments, paymentsMode } from "@/lib/payments";
@@ -15,7 +15,7 @@ import { payoutShort } from "@/lib/payout";
 import { fail, ok, providerFailure, zodFieldErrors, type ActionResult } from "./result";
 
 const createSchema = z.object({
-  network: z.enum(NETWORKS, { error: "Choose a network." }),
+  networks: z.array(z.enum(NETWORKS)).min(1, "Choose at least one network."),
   payoutAccountId: z.string().min(1, "Choose where payouts go."),
   label: z.string().trim().max(40, "Keep the name under 40 characters.").optional(),
 });
@@ -48,7 +48,7 @@ export async function createWallet(input: unknown): Promise<ActionResult<{ id: s
   let created: { ref: string; address: string };
   try {
     // Qadi wallet labels are unique per business, which makes this call safe to retry.
-    created = await payments().createDepositAddress({ label: `kidogopay-${id}`, network: v.network });
+    created = await payments().createDepositAddress({ label: `kidogopay-${id}` });
   } catch (err) {
     return providerFailure(err);
   }
@@ -57,7 +57,7 @@ export async function createWallet(input: unknown): Promise<ActionResult<{ id: s
     id,
     userId: me.id,
     label: v.label || null,
-    network: v.network,
+    networks: NETWORKS.filter((n) => v.networks.includes(n)),
     tokens: [...TOKENS],
     address: created.address,
     payoutAccountId: payout.id,
@@ -103,7 +103,7 @@ export async function relinkWallet(id: string, payoutAccountId: string): Promise
     subject: "A wallet now pays out somewhere new",
     heading: "Payout account changed",
     lines: [
-      `Your ${NETWORK_INFO[w.network].name} wallet ending ${w.address.slice(-4)} now pays out to ${payoutShort(payout)}.`,
+      `Your ${networkNames(w.networks)} wallet ending ${w.address.slice(-4)} now pays out to ${payoutShort(payout)}.`,
       "If this wasn't you, change your password right away and pause the wallet.",
     ],
     action: { label: "Review wallets", url: appUrl("/dashboard/wallets") },
@@ -170,7 +170,7 @@ export async function simulateDeposit(id: string, input: unknown): Promise<Actio
 
   const deposit = mockProvider.depositEvent({
     address: w.address,
-    network: w.network,
+    network: w.networks[0],
     token: parsed.data.token,
     amount: parsed.data.amount,
   });

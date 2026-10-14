@@ -15,6 +15,20 @@
       "when": 1791949256259,
       "tag": "0001_drop_solana",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791949395580,
+      "tag": "0002_wallet_networks",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791949400224,
+      "tag": "0003_drop_wallet_network",
+      "breakpoints": true
     }
   ]
 }

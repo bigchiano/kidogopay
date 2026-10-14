@@ -9,7 +9,7 @@ import { formatFiat, formatUsd, shortAddress } from "@/lib/format";
 import { payoutShort } from "@/lib/payout";
 import { CURRENCIES, type Currency } from "@/lib/constants";
 import { ButtonLink, PageHeader, Panel } from "@/components/ui";
-import { NetworkName } from "@/components/crypto";
+import { NetworkNames } from "@/components/crypto";
 import { ActivityList } from "@/components/dashboard/activity-list";
 import { EmptyState, LimitMeter, LimitNotice, SectionHeading } from "@/components/dashboard/shared";
 
@@ -77,7 +77,7 @@ export default async function OverviewPage() {
                     href={`/dashboard/wallets#w-${w.id}`}
                     className="grid items-center gap-1.5 px-5 py-4 transition-colors hover:bg-chalk/70 sm:grid-cols-[190px_1fr_auto] sm:gap-6"
                   >
-                    <NetworkName network={w.network} />
+                    <NetworkNames networks={w.networks} />
                     <p className="min-w-0 truncate text-sm text-muted">
                       <span className="font-mono text-ink">{shortAddress(w.address)}</span> pays out to {payoutShort(w.payoutAccount)}
                     </p>

@@ -2,7 +2,7 @@ import "server-only";
 import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { db, type Tx } from "@/lib/db";
 import { providerEvent, transaction, user, wallet, type TxStatus } from "@/lib/db/schema";
-import { NETWORKS, NETWORK_INFO, kybThresholdUsd, type Network } from "@/lib/constants";
+import { NETWORKS, kybThresholdUsd, networkNames, type Network } from "@/lib/constants";
 import { kybStatus, usedVolumeUsd } from "@/lib/limits";
 import { appUrl, sendEmail } from "@/lib/mail";
 import { formatUsd } from "@/lib/format";
@@ -117,7 +117,7 @@ async function applyDeposit(tx: Tx, e: Extract<ProviderEvent, { type: "deposit.r
       status,
       holdReason,
       failureReason: note,
-      network: network ?? w.network,
+      network: network ?? w.networks[0],
       token: e.token,
       cryptoAmount: e.cryptoAmount.toFixed(6),
       fiatCurrency: w.payoutAccount.currency,
@@ -250,7 +250,7 @@ export async function pauseWalletsAtLimit(userId: string) {
     .update(wallet)
     .set({ status: "paused", pausedReason: "limit" })
     .where(and(eq(wallet.userId, userId), eq(wallet.status, "active"), isNull(wallet.archivedAt)))
-    .returning({ network: wallet.network });
+    .returning({ networks: wallet.networks });
   if (!paused.length) return;
 
   const [owner] = await db.select({ email: user.email }).from(user).where(eq(user.id, userId));
@@ -260,7 +260,7 @@ export async function pauseWalletsAtLimit(userId: string) {
     subject: "Your KidogoPay wallets are paused",
     heading: "Verify your business to keep cashing out",
     lines: [
-      `Your account has reached ${formatUsd(kybThresholdUsd())} in total volume, so we've paused your ${paused.length === 1 ? NETWORK_INFO[paused[0].network].name + " wallet" : "wallets"}.`,
+      `Your account has reached ${formatUsd(kybThresholdUsd())} in total volume, so we've paused your ${paused.length === 1 ? networkNames(paused[0].networks) + " wallet" : "wallets"}.`,
       "Anything sent to them now is held instead of paid out. Once your business is verified, turn them back on and held deposits pay out automatically.",
     ],
     action: { label: "Open settings", url: appUrl("/dashboard/settings") },

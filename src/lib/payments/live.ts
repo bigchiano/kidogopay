@@ -205,7 +205,7 @@ export const liveProvider: PaymentsProvider = {
     await qadi("DELETE", `/v1/bank-accounts/${encodeURIComponent(ref)}`);
   },
 
-  async createDepositAddress({ label, network }) {
+  async createDepositAddress({ label }) {
     const chain = "evm";
     const d = await qadi<{ id: string; addresses: { chain: string; address: string }[] }>("POST", "/v1/wallets", {
       label,

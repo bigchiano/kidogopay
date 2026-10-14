@@ -52,13 +52,6 @@ export function shortAddress(address: string, head = 6, tail = 4) {
   return `${address.slice(0, head)}…${address.slice(-tail)}`;
 }
 
-/** Splits an address into groups of four so people can check it by eye. */
-export function addressGroups(address: string) {
-  const body = address.startsWith("0x") ? address.slice(2) : address;
-  const groups = body.match(/.{1,4}/g) ?? [];
-  return address.startsWith("0x") ? ["0x", ...groups] : groups;
-}
-
 /** •••• 4821 */
 export function maskAccount(accountNumber: string) {
   return `••••\u00a0${accountNumber.slice(-4)}`;

@@ -1,6 +1,6 @@
-import { NETWORK_INFO } from "@/lib/constants";
+import { NETWORK_INFO, networkNames } from "@/lib/constants";
 import type { PayoutAccount, Wallet } from "@/lib/db/schema";
-import { AddressText, NetworkName, TokenChips } from "@/components/crypto";
+import { AddressText, NetworkNames, TokenChips } from "@/components/crypto";
 import { CopyButton } from "@/components/copy-button";
 import { PayoutSummary } from "@/components/payout-summary";
 import { QrCode } from "@/components/qr-code";
@@ -16,7 +16,8 @@ type Props = {
 };
 
 export async function WalletCard({ wallet: w, accounts, isNew = false, demo }: Props) {
-  const net = NETWORK_INFO[w.network];
+  const nets = networkNames(w.networks);
+  const standards = w.networks.map((n) => `${NETWORK_INFO[n].tokenStandard} on ${NETWORK_INFO[n].short}`).join(", ");
   const paused = w.status !== "active";
   const coins = w.tokens.join(" or ");
   const ramp = paused ? "#dcdeec" : "#ffb61d";
@@ -28,7 +29,7 @@ export async function WalletCard({ wallet: w, accounts, isNew = false, demo }: P
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <h2 className="flex flex-wrap items-center gap-2 text-lg">
-            <NetworkName network={w.network} />
+            <NetworkNames networks={w.networks} />
             <TokenChips tokens={w.tokens} />
           </h2>
           {w.label ? <p className="mt-1 text-sm text-muted">{w.label}</p> : null}
@@ -54,7 +55,7 @@ export async function WalletCard({ wallet: w, accounts, isNew = false, demo }: P
       <div className="mt-5 grid items-center gap-2 lg:grid-cols-[minmax(0,1.25fr)_88px_minmax(0,1fr)] lg:gap-3">
         <div className={`rounded-xl p-4 ${paused ? "bg-haze" : "bg-chalk"}`}>
           <p className="text-sm font-semibold text-muted">
-            Send {coins} on {net.name} to
+            Send {coins} on {nets} to
           </p>
           <AddressText address={w.address} className={`mt-2 block ${paused ? "text-muted" : ""}`} />
           {paused ? (
@@ -84,7 +85,7 @@ export async function WalletCard({ wallet: w, accounts, isNew = false, demo }: P
       </div>
 
       <p className="mt-4 text-sm text-muted">
-        Only send {coins} on {net.name} ({net.tokenStandard}). Coins sent on other networks may not be recoverable.
+        Only send {coins} on {nets} ({standards}). Coins sent on other networks may not be recoverable.
       </p>
 
       <WalletActions id={w.id} active={!paused} payoutAccountId={w.payoutAccountId} accounts={accounts} demo={demo} />

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition, type FormEvent } from "react";
-import { NETWORKS, NETWORK_INFO, type Network, type PayoutMethod } from "@/lib/constants";
+import { NETWORKS, NETWORK_INFO, networkNames, type Network, type PayoutMethod } from "@/lib/constants";
 import { createWallet } from "@/lib/actions/wallets";
 import { NetworkName } from "@/components/crypto";
 import { PayoutIcon } from "@/components/payout-summary";
@@ -20,7 +20,7 @@ const card = (selected: boolean) =>
 export function WalletForm({ accounts, preselect }: { accounts: AccountOption[]; preselect?: string }) {
   const router = useRouter();
   const [pending, start] = useTransition();
-  const [network, setNetwork] = useState<Network>("base");
+  const [networks, setNetworks] = useState<Network[]>([...NETWORKS]);
   const [payoutId, setPayoutId] = useState(accounts.some((a) => a.id === preselect) ? preselect! : accounts[0]?.id);
   const [label, setLabel] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -31,7 +31,7 @@ export function WalletForm({ accounts, preselect }: { accounts: AccountOption[];
     e.preventDefault();
     setError(null);
     start(async () => {
-      const res = await createWallet({ network, payoutAccountId: payoutId, label });
+      const res = await createWallet({ networks, payoutAccountId: payoutId, label });
       if (!res.ok) {
         setError(res.error);
         setFieldErrors(res.fieldErrors ?? {});
@@ -45,17 +45,27 @@ export function WalletForm({ accounts, preselect }: { accounts: AccountOption[];
     <form onSubmit={submit} className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
       <div className="space-y-9">
         <fieldset>
-          <legend className="text-sm font-semibold">Network</legend>
+          <legend className="text-sm font-semibold">Networks</legend>
+          <p className="mt-1 text-sm text-muted">One address receives on every network you pick.</p>
           <div className="mt-3 grid gap-3 sm:grid-cols-3">
             {NETWORKS.map((n) => (
-              <label key={n} className={card(network === n)}>
-                <input type="radio" name="network" value={n} checked={network === n} onChange={() => setNetwork(n)} className="sr-only" />
+              <label key={n} className={card(networks.includes(n))}>
+                <input
+                  type="checkbox"
+                  name="networks"
+                  value={n}
+                  checked={networks.includes(n)}
+                  onChange={(e) =>
+                    setNetworks((cur) => NETWORKS.filter((x) => (x === n ? e.target.checked : cur.includes(x))))
+                  }
+                  className="sr-only"
+                />
                 <NetworkName network={n} />
                 <span className="mt-1 block text-sm text-muted">USDC and USDT ({NETWORK_INFO[n].tokenStandard})</span>
               </label>
             ))}
           </div>
-          {fieldErrors.network ? <p className="mt-2 text-sm text-ember">{fieldErrors.network}</p> : null}
+          {fieldErrors.networks ? <p className="mt-2 text-sm text-ember">{fieldErrors.networks}</p> : null}
         </fieldset>
 
         <fieldset>
@@ -92,7 +102,7 @@ export function WalletForm({ accounts, preselect }: { accounts: AccountOption[];
 
       <aside className="on-dark rounded-2xl bg-adire p-6 text-chalk lg:sticky lg:top-24">
         <p className="text-lg leading-snug">
-          USDC or USDT sent to this address on <strong>{NETWORK_INFO[network].name}</strong> is converted to{" "}
+          USDC or USDT sent to this address on <strong>{networkNames(networks)}</strong> is converted to{" "}
           <strong>{selected?.currency}</strong> and paid to <strong>{selected?.title}</strong> {selected?.detail}.
         </p>
         <RampLine direction="offramp" className="my-5 h-10 w-full" />
@@ -101,7 +111,7 @@ export function WalletForm({ accounts, preselect }: { accounts: AccountOption[];
             <Alert>{error}</Alert>
           </div>
         ) : null}
-        <Button type="submit" className="w-full" disabled={pending || !payoutId}>
+        <Button type="submit" className="w-full" disabled={pending || !payoutId || !networks.length}>
           {pending ? "Creating wallet…" : "Create wallet"}
         </Button>
       </aside>

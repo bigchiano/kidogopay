@@ -17,7 +17,7 @@ export default async function NewWalletPage({ searchParams }: { searchParams: Pr
   return (
     <>
       <BackLink href="/dashboard/wallets">Wallets</BackLink>
-      <PageHeader title="New wallet" description="Pick a network and where the money should land. You get an address to share or send to." />
+      <PageHeader title="New wallet" description="Pick your networks and where the money should land. You get an address to share or send to." />
       {limit.reached ? (
         <Alert>Verify your business in Settings before creating more wallets.</Alert>
       ) : accounts.length === 0 ? (

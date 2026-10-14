@@ -142,7 +142,8 @@ export const wallet = pgTable(
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     label: text("label"),
-    network: networkEnum("network").notNull(),
+    /** One Qadi EVM address receives on every network listed here. */
+    networks: networkEnum("networks").array().notNull(),
     tokens: text("tokens").array().notNull(),
     address: text("address").notNull(),
     payoutAccountId: text("payout_account_id")
@@ -159,7 +160,7 @@ export const wallet = pgTable(
   (t) => [
     index("wallet_user_idx").on(t.userId),
     uniqueIndex("wallet_provider_ref_idx").on(t.providerRef),
-    uniqueIndex("wallet_network_address_idx").on(t.network, t.address),
+    uniqueIndex("wallet_address_idx").on(t.address),
   ],
 );
 

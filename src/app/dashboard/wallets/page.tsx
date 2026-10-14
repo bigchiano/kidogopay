@@ -40,7 +40,7 @@ export default async function WalletsPage({ searchParams }: { searchParams: Prom
       ) : (
         <EmptyState
           title="Create your first wallet"
-          body="Pick a network and a payout account. Anything sent to the address is converted and paid out automatically."
+          body="Pick your networks and a payout account. Anything sent to the address is converted and paid out automatically."
           action={<ButtonLink href="/dashboard/wallets/new">Create a wallet</ButtonLink>}
         />
       )}

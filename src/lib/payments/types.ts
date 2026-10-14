@@ -99,7 +99,7 @@ export interface PaymentsProvider {
   listBanks(currency: Currency): Promise<Bank[]>;
   createBeneficiary(input: BeneficiaryInput): Promise<{ ref: string }>;
   removeBeneficiary(ref: string): Promise<void>;
-  createDepositAddress(input: { label: string; network: Network }): Promise<{ ref: string; address: string }>;
+  createDepositAddress(input: { label: string }): Promise<{ ref: string; address: string }>;
   archiveDepositAddress(ref: string): Promise<void>;
   offrampDeposit(input: OfframpInput): Promise<OfframpStarted>;
   createOnramp(input: OnrampInput): Promise<OnrampOrder>;

@@ -38,6 +38,12 @@ export const NETWORK_INFO: Record<Network, NetworkInfo> = {
   },
 };
 
+/** "Base", "Base or BNB Smart Chain" */
+export function networkNames(networks: readonly Network[], join = "or") {
+  const names = networks.map((n) => NETWORK_INFO[n].name);
+  return names.length > 1 ? `${names.slice(0, -1).join(", ")} ${join} ${names.at(-1)}` : (names[0] ?? "");
+}
+
 type CurrencyInfo = {
   name: string;
   country: string;

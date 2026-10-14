@@ -66,7 +66,7 @@ export const mockProvider = {
 
   async removeBeneficiary() {},
 
-  async createDepositAddress(input: { network: Network }) {
+  async createDepositAddress(_input: { label: string }) {
     return { ref: ref("mock_wal"), address: fakeAddress() };
   },
 
