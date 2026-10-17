@@ -17,7 +17,11 @@ export async function POST(request: Request) {
   } catch (err) {
     console.error("[webhook] verification error", err);
   }
-  if (!verified) return Response.json({ error: "Invalid signature" }, { status: 401 });
+  if (!verified) {
+    // 200 so unverifiable senders get nothing to probe; nothing in the body is acted on.
+    console.warn("[webhook] ignored a request with a missing or invalid signature");
+    return Response.json({ received: true });
+  }
 
   try {
     await processProviderEvents(provider.parseWebhook(rawBody, request.headers));
